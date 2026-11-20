@@ -3,8 +3,8 @@
 export const CONFIG = {
   // Identité du site (le nom affiché et les couleurs sont dans index.html et css/style.css).
   site: {
-    cleMemoire: "ticketcommune", // clé du stockage du navigateur : à changer dans un fork
-    depot: "https://github.com/KiyoniX/TicketCommune", // lien « Code source » du pied de page
+    cleMemoire: "communet", // clé du stockage du navigateur : à changer dans un fork
+    depot: "https://github.com/KiyoniX/CommuNet", // lien « Code source » du pied de page
   },
 
   // Commune affichée à la première visite.

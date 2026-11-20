@@ -1,8 +1,8 @@
-# TicketCommune
+# CommuNet
 
 Le ticket de caisse de ta ville : les comptes officiels de n'importe quelle commune de France, présentés comme un ticket de caisse « pour 1 habitant ». Ce qu'elle a dépensé (salaires, achats, travaux, dette…), qui a payé (impôts locaux, État, usagers, emprunts), le « rendu » (ce qu'elle a mis de côté ou puisé dans ses réserves) et l'« ardoise » (sa dette).
 
-**Site : https://kiyonix.github.io/TicketCommune/**
+**Site : https://kiyonix.github.io/CommuNet/**
 
 - Les données viennent de l'[OFGL](https://data.ofgl.fr/explore/dataset/ofgl-base-communes/) (Observatoire des finances et de la gestion publique locales), d'après les comptes de gestion de la DGFiP : budget principal de chaque commune, de 2018 à 2025, en euros par habitant.
 - La page les lit **en direct depuis le navigateur**, en deux requêtes : les comptes de la commune (toutes les années d'un coup) et les médianes des communes de même taille.

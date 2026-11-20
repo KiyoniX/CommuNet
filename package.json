@@ -1,5 +1,5 @@
 {
-  "name": "ticketcommune",
+  "name": "communet",
   "private": true,
   "description": "Le ticket de caisse de ta ville (site statique, aucune dépendance).",
   "type": "module",
