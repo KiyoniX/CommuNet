@@ -1,0 +1,13 @@
+{
+  "name": "ticketcommune",
+  "private": true,
+  "description": "Le ticket de caisse de ta ville (site statique, aucune dépendance).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "local": "python -m http.server 8000"
+  }
+}

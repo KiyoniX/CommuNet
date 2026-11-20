@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <!-- Identité du site : <title>, description, theme-color, <h1> et slogan ci-dessous ; logo.svg ; css/style.css ; CONFIG.site. -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2b2d42">
+  <title>Le ticket de caisse de ta ville</title>
+  <meta name="description" content="Les comptes officiels de ta commune présentés comme un ticket de caisse : ce qu'elle a dépensé pour chaque habitant, qui a payé, sa dette, comparés aux villes de même taille.">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+
+  <!-- Polices : Bunny Fonts (sans pistage). IBM Plex Mono pour le ticket, Outfit pour les titres, Inter pour le texte. -->
+  <link rel="preconnect" href="https://fonts.bunny.net">
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=ibm-plex-mono:400,600,700|inter:400,600|outfit:600,700&display=swap">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ticket.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header class="entete">
+    <h1><img class="logo" src="logo.svg" alt=""> TicketCommune</h1>
+    <p class="slogan">Le ticket de caisse de ta ville</p>
+
+    <div class="commandes">
+      <form id="recherche" class="recherche" role="search" autocomplete="off">
+        <input id="recherche-texte" type="search" placeholder="Ta commune…"
+               aria-label="Chercher une commune" aria-controls="suggestions">
+        <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+      </form>
+      <label class="choix">
+        <span>Année</span>
+        <select id="annee"></select>
+      </label>
+    </div>
+  </header>
+
+  <main class="contenu">
+    <p id="etat" class="etat" aria-live="polite">Lecture des comptes…</p>
+
+    <div class="comptoir">
+      <article id="ticket" class="ticket" aria-label="Ticket de caisse de la commune"></article>
+      <div class="actions">
+        <button id="copier-texte" type="button">📋 Copier pour Discord</button>
+        <button id="copier-lien" type="button">🔗 Copier le lien</button>
+      </div>
+    </div>
+
+    <section class="bloc">
+      <h2 id="evolution-titre">Sur 8 ans</h2>
+      <div class="tableau-defile">
+        <table class="evolution">
+          <thead>
+            <tr><th scope="col">Poste</th><th scope="col">Courbe</th><th scope="col">Avant</th><th scope="col">Maintenant</th><th scope="col">Évolution</th></tr>
+          </thead>
+          <tbody id="evolution"></tbody>
+        </table>
+      </div>
+      <p class="petit">Montants par habitant, en euros courants (sans tenir compte de l'inflation).</p>
+    </section>
+
+    <section class="bloc">
+      <h2>À savoir</h2>
+      <ul class="savoir">
+        <li>Ce sont les <strong>comptes officiels</strong> du budget principal de la commune (comptes de gestion de la DGFiP, mis en forme par l'OFGL), divisés par sa population.</li>
+        <li><strong>L'intercommunalité n'est pas comptée.</strong> Dans les grandes villes, la métropole ou l'agglo s'occupe souvent des transports, de la voirie, de l'eau ou des déchets : une partie de ce que tu paies passe par elle.</li>
+        <li>Les budgets annexes (parkings, centre de congrès…) ne sont pas comptés non plus.</li>
+        <li>Les « impôts locaux » sont ceux que touche la commune, pas forcément ce que paie chaque habitant : les entreprises en paient une partie.</li>
+        <li>▲▼ compare chaque ligne à la <strong>médiane</strong> des communes de même taille (la moitié dépense plus, l'autre moitié moins).</li>
+        <li>« Remboursable en X ans » : la dette divisée par l'épargne brute de l'année. Au-delà de 12 ans, c'est jugé préoccupant.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="pied">
+    Données : <a href="https://data.ofgl.fr/explore/dataset/ofgl-base-communes/" target="_blank" rel="noopener">comptes des communes, OFGL</a>
+    (Licence Ouverte) · communes : IGN Géoplateforme.
+    · <a id="lien-depot" href="#" target="_blank" rel="noopener">Code source</a>
+  </footer>
+</body>
+</html>
