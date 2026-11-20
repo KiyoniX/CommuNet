@@ -8,7 +8,8 @@ Le ticket de caisse de ta ville : les comptes officiels de n'importe quelle comm
 - La page les lit **en direct depuis le navigateur**, en deux requêtes : les comptes de la commune (toutes les années d'un coup) et les médianes des communes de même taille.
 - Chaque ligne est comparée (▲▼) à la **médiane** des communes de la même tranche de population. La médiane plutôt que la moyenne : Paris pèse 2 millions d'habitants dans la tranche des plus de 100 000.
 - Les lignes de chaque section retombent sur les totaux officiels ; s'il manque des postes, une ligne « Divers » fait l'appoint.
-- « Copier pour Discord » donne le ticket en texte à chasse fixe, prêt à coller. Le lien de la page (`#commune=63113&annee=2025`) rouvre le même ticket.
+- Deux modes : **par habitant** (les comptes divisés par toute la population, bébés compris) ou **total ville** (« 223,9 M€ », « 11,36 Md€ »). Les écarts ▲▼ restent calculés par habitant, la seule comparaison juste entre villes de tailles différentes.
+- « Copier pour Discord » donne le ticket en texte à chasse fixe, prêt à coller. Le lien de la page (`#commune=63113&annee=2025&mode=total`) rouvre le même ticket.
 - Un tableau « Sur 8 ans » montre l'évolution des impôts locaux, des salaires, des travaux, de la dette et du total.
 
 Construit à partir de [ClimaBien](https://github.com/KiyoniX/ClimaBien), mais indépendant (et sans carte).

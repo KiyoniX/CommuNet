@@ -1,10 +1,16 @@
 // Affichage : le ticket (DOM), sa version texte pour Discord et les mini-courbes « Sur 8 ans ».
 import { CONFIG } from "./config.js";
 import { serie } from "./ticket.js";
-import { el, montant } from "./base/format.js";
+import { el, montant, montantCompact } from "./base/format.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 const habitants = (n) => `${n.toLocaleString("fr-FR")} hab.`;
+
+/**
+ * Formateur de montants selon le mode : « habitant » (les données, en €/hab) ou « total » (× population).
+ * Les écarts ▲▼ restent calculés par habitant dans les deux modes.
+ */
+export const formateur = (mode, population) => (mode === "total" ? (x) => montantCompact(x * population) : montant);
 const signe = (pct) => (pct > 0 ? `+${pct}` : `${pct}`);
 
 /** « MAIRIE DE CLERMONT-FERRAND », « MAIRIE D'ISSOIRE », « MAIRIE DU MANS »… */
@@ -26,16 +32,16 @@ function badgeEcart(ecart) {
   );
 }
 
-function ligneTicket({ libelle, aide, montant: m, ecart }) {
-  return el("li", { class: "ligne", title: aide }, el("span", { class: "libelle" }, libelle), el("span", { class: "montant" }, montant(m)), badgeEcart(ecart));
+function ligneTicket({ libelle, aide, montant: m, ecart }, f) {
+  return el("li", { class: "ligne", title: aide }, el("span", { class: "libelle" }, libelle), el("span", { class: "montant" }, f(m)), badgeEcart(ecart));
 }
 
-function sectionTicket(s, libelleTotal) {
+function sectionTicket(s, libelleTotal, f, mode) {
   return [
-    el("h3", {}, s.titre),
-    el("ul", { class: "lignes" }, s.lignes.map(ligneTicket)),
+    el("h3", {}, mode === "total" ? s.titreTotal : s.titre),
+    el("ul", { class: "lignes" }, s.lignes.map((l) => ligneTicket(l, f))),
     el("div", { class: "pointilles" }),
-    el("div", { class: "ligne total" }, el("span", { class: "libelle" }, libelleTotal), el("span", { class: "montant" }, montant(s.total)), badgeEcart(s.ecart)),
+    el("div", { class: "ligne total" }, el("span", { class: "libelle" }, libelleTotal), el("span", { class: "montant" }, f(s.total)), badgeEcart(s.ecart)),
   ];
 }
 
@@ -57,20 +63,21 @@ function codeBarres(insee) {
   return svg;
 }
 
-/** Remplit l'élément `article` avec le ticket. */
-export function afficherTicket(article, t) {
-  const rendu = t.rendu >= 0 ? `La ville a mis ${montant(t.rendu)} de côté` : `La ville a puisé ${montant(-t.rendu)} dans ses réserves`;
+/** Remplit l'élément `article` avec le ticket. `mode` : « habitant » ou « total ». */
+export function afficherTicket(article, t, mode = "habitant") {
+  const f = formateur(mode, t.population);
+  const rendu = t.rendu >= 0 ? `La ville a mis ${f(t.rendu)} de côté` : `La ville a puisé ${f(-t.rendu)} dans ses réserves`;
   // replaceChildren n'aplatit pas les tableaux : on aplatit, et on retire les éléments absents (null, false).
   const contenu = [
-    el("header", { class: "tete" }, el("p", { class: "enseigne" }, enseigne(t.commune.nom)), el("p", {}, `Comptes ${t.annee} · ${habitants(t.population)}`), el("p", { class: "pour" }, "TICKET POUR 1 HABITANT")),
+    el("header", { class: "tete" }, el("p", { class: "enseigne" }, enseigne(t.commune.nom)), el("p", {}, `Comptes ${t.annee} · ${habitants(t.population)}`), el("p", { class: "pour" }, mode === "total" ? "TICKET POUR TOUTE LA VILLE" : "TICKET POUR 1 HABITANT")),
     el("div", { class: "trait" }),
-    sectionTicket(t.depenses, "TOTAL DÉPENSÉ"),
+    sectionTicket(t.depenses, "TOTAL DÉPENSÉ", f, mode),
     el("div", { class: "trait" }),
-    sectionTicket(t.recettes, "TOTAL ENCAISSÉ"),
+    sectionTicket(t.recettes, "TOTAL ENCAISSÉ", f, mode),
     el("div", { class: "trait" }),
-    el("div", { class: "ligne total" }, el("span", { class: "libelle" }, "RENDU"), el("span", { class: "montant" }, montant(t.rendu)), el("span", { class: "ecart" })),
+    el("div", { class: "ligne total" }, el("span", { class: "libelle" }, "RENDU"), el("span", { class: "montant" }, f(t.rendu)), el("span", { class: "ecart" })),
     el("p", { class: "note" }, `(${rendu})`),
-    el("div", { class: "ligne total" }, el("span", { class: "libelle" }, "ARDOISE (dette)"), el("span", { class: "montant" }, montant(t.dette.montant)), badgeEcart(t.dette.ecart)),
+    el("div", { class: "ligne total" }, el("span", { class: "libelle" }, "ARDOISE (dette)"), el("span", { class: "montant" }, f(t.dette.montant)), badgeEcart(t.dette.ecart)),
     el(
       "p",
       { class: "note" },
@@ -78,7 +85,7 @@ export function afficherTicket(article, t) {
     ),
     el("div", { class: "trait" }),
     t.nombreComparees &&
-      el("p", { class: "note comparaison" }, `▲▼ : écart avec la médiane des ${t.nombreComparees} communes de ${CONFIG.tranches[t.tranche]}`),
+      el("p", { class: "note comparaison" }, `▲▼ : écart par habitant avec la médiane des ${t.nombreComparees} communes de ${CONFIG.tranches[t.tranche]}`),
     codeBarres(t.commune.insee),
     el("p", { class: "merci" }, "MERCI DE VOTRE VISITE"),
     el("p", { class: "note" }, `INSEE ${t.commune.insee} · budget principal · source OFGL`),
@@ -87,15 +94,16 @@ export function afficherTicket(article, t) {
 }
 
 /** Version texte du ticket, à coller sur Discord (bloc de code, police à chasse fixe). */
-export function texteTicket(t) {
+export function texteTicket(t, mode = "habitant") {
   const L = 38;
   const ligne = (g, d) => `${g}${" ".repeat(Math.max(1, L - g.length - d.length))}${d}`;
   const centre = (s) => `${" ".repeat(Math.max(0, Math.floor((L - s.length) / 2)))}${s}`;
   const trait = "-".repeat(L);
-  const m = (x) => montant(x).replace(/\s/g, " ");
+  const f = formateur(mode, t.population);
+  const m = (x) => f(x).replace(/\s/g, " ");
   const lignes = [
     centre(enseigne(t.commune.nom).slice(0, L)),
-    centre(`Comptes ${t.annee} · pour 1 habitant`),
+    centre(`Comptes ${t.annee} · ${mode === "total" ? "toute la ville" : "pour 1 habitant"}`),
     trait,
     "DÉPENSES",
     ...t.depenses.lignes.map((l) => ligne(l.libelle.slice(0, 26), m(l.montant))),
@@ -132,10 +140,13 @@ function courbe(points) {
 }
 
 /** Tableau « Sur 8 ans » : une ligne par poste suivi, avec courbe, première et dernière valeur, évolution. */
-export function afficherEvolution(tableau, commune, libelles) {
+export function afficherEvolution(tableau, commune, libelles, mode = "habitant") {
+  const total = mode === "total";
   tableau.replaceChildren(
     ...CONFIG.evolution.map((agregat) => {
-      const points = serie(commune, agregat);
+      // En mode total, chaque année est multipliée par sa propre population.
+      const points = serie(commune, agregat).map((p) => (total ? { ...p, valeur: p.valeur * p.population } : p));
+      const f = total ? montantCompact : (x) => montant(Math.round(x));
       if (points.length < 2) return null;
       const [premier, dernier] = [points[0], points.at(-1)];
       const pct = Math.abs(premier.valeur) >= 0.5 ? Math.round((100 * (dernier.valeur - premier.valeur)) / Math.abs(premier.valeur)) : null;
@@ -144,8 +155,8 @@ export function afficherEvolution(tableau, commune, libelles) {
         {},
         el("th", { scope: "row" }, libelles[agregat] ?? agregat),
         el("td", {}, courbe(points)),
-        el("td", { class: "nombre" }, `${montant(Math.round(premier.valeur))}`, el("small", {}, ` en ${premier.annee}`)),
-        el("td", { class: "nombre" }, `${montant(Math.round(dernier.valeur))}`, el("small", {}, ` en ${dernier.annee}`)),
+        el("td", { class: "nombre" }, f(premier.valeur), el("small", {}, ` en ${premier.annee}`)),
+        el("td", { class: "nombre" }, f(dernier.valeur), el("small", {}, ` en ${dernier.annee}`)),
         el("td", { class: "nombre evolution" }, pct == null ? "" : `${signe(pct)} %`),
       );
     }).filter(Boolean),

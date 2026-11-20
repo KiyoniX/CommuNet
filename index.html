@@ -32,6 +32,10 @@
         <span>Année</span>
         <select id="annee"></select>
       </label>
+      <div class="bascule-mode" role="group" aria-label="Montants">
+        <button type="button" data-mode="habitant" aria-pressed="true">Par habitant</button>
+        <button type="button" data-mode="total" aria-pressed="false">Total ville</button>
+      </div>
     </div>
   </header>
 
@@ -62,7 +66,7 @@
     <section class="bloc">
       <h2>À savoir</h2>
       <ul class="savoir">
-        <li>Ce sont les <strong>comptes officiels</strong> du budget principal de la commune (comptes de gestion de la DGFiP, mis en forme par l'OFGL), divisés par sa population.</li>
+        <li>Ce sont les <strong>comptes officiels</strong> du budget principal de la commune (comptes de gestion de la DGFiP, mis en forme par l'OFGL), « Par habitant » divise chaque montant par toute la population, bébés compris : pour un foyer, compte à peu près le double.</li>
         <li><strong>L'intercommunalité n'est pas comptée.</strong> Dans les grandes villes, la métropole ou l'agglo s'occupe souvent des transports, de la voirie, de l'eau ou des déchets : une partie de ce que tu paies passe par elle.</li>
         <li>Les budgets annexes (parkings, centre de congrès…) ne sont pas comptés non plus.</li>
         <li>Les « impôts locaux » sont ceux que touche la commune, pas forcément ce que paie chaque habitant : les entreprises en paient une partie.</li>

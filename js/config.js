@@ -15,6 +15,7 @@ export const CONFIG = {
   ticket: {
     depenses: {
       titre: "Ce que la ville a dépensé pour toi",
+      titreTotal: "Ce que la ville a dépensé", // en mode « Total ville »
       total: "Dépenses totales",
       lignes: [
         { agregat: "Frais de personnel", libelle: "Salaires des agents", aide: "Rémunérations et charges de tout le personnel municipal." },

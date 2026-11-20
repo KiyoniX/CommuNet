@@ -62,3 +62,12 @@ test("kilometres : en mètres sous 1 km", () => {
   assert.equal(kilometres(0.045), "45 m");
   assert.equal(kilometres(1.25), "1,3 km");
 });
+
+test("montantCompact : millions, milliards, et euros arrondis sous le million", async () => {
+  const { montantCompact } = await import("../../js/base/format.js");
+  const espaces = (t) => t.replace(/\s/g, " ");
+  assert.equal(espaces(montantCompact(223893395)), "223,9 M€");
+  assert.equal(espaces(montantCompact(11360000000)), "11,36 Md€");
+  assert.equal(espaces(montantCompact(85437)), "85 400 €");
+  assert.equal(espaces(montantCompact(-16526000)), "-16,5 M€");
+});

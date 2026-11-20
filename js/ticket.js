@@ -17,13 +17,13 @@ function ligne(postes, medianes, { agregat, libelle, aide }) {
 }
 
 /** Une section (dépenses ou recettes) ; « Divers » fait l'appoint si les lignes ne retombent pas sur le total. */
-function section(postes, medianes, { titre, total, lignes }) {
+function section(postes, medianes, { titre, titreTotal = titre, total, lignes }) {
   const detail = lignes.map((l) => ligne(postes, medianes, l)).filter((l) => Math.abs(l.montant) >= 0.005);
   const totalOfficiel = arrondi(postes[total] ?? detail.reduce((s, l) => s + l.montant, 0));
   const appoint = arrondi(totalOfficiel - detail.reduce((s, l) => s + l.montant, 0));
   if (Math.abs(appoint) >= 0.5) detail.push({ agregat: null, libelle: "Divers", aide: "Postes non détaillés.", montant: appoint, mediane: null, ecart: null });
   const comparaison = ligne(postes, medianes, { agregat: total });
-  return { titre, lignes: detail, total: totalOfficiel, mediane: comparaison.mediane, ecart: comparaison.ecart };
+  return { titre, titreTotal, lignes: detail, total: totalOfficiel, mediane: comparaison.mediane, ecart: comparaison.ecart };
 }
 
 /**
@@ -61,7 +61,7 @@ export function construireTicket(commune, annee, medianes = null) {
 export function serie(commune, agregat) {
   return Object.keys(commune.annees)
     .sort()
-    .map((annee) => ({ annee, valeur: commune.annees[annee].postes[agregat] ?? null }))
+    .map((annee) => ({ annee, valeur: commune.annees[annee].postes[agregat] ?? null, population: commune.annees[annee].population }))
     .filter((p) => p.valeur != null);
 }
 

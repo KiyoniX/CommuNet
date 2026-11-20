@@ -8,6 +8,17 @@ const heureMinute = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: 
 
 /** 67 € pour un montant rond, 67,50 € sinon. */
 export const montant = (valeur) => (Number.isInteger(valeur) ? eurosRonds : euros).format(valeur);
+const millions = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+const milliards = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const eurosEntiers = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+/** Grand montant lisible : « 223,9 M€ », « 11,36 Md€ », « 85 400 € » sous le million. */
+export function montantCompact(valeur) {
+  const a = Math.abs(valeur);
+  if (a >= 1e9) return `${milliards.format(valeur / 1e9)} Md€`;
+  if (a >= 1e6) return `${millions.format(valeur / 1e6)} M€`;
+  return eurosEntiers.format(Math.round(valeur / 100) * 100);
+}
+
 /** Prix au litre, au millième : 2,007 €. */
 export const prixLitre = (prix) => eurosMillimes.format(prix);
 export const heure = (date) => heureMinute.format(date); // 14:32

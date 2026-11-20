@@ -11,9 +11,10 @@ import { brancherRechercheCommune } from "./base/recherche.js";
 const $ = (id) => document.getElementById(id);
 const memoire = creerMemoire(CONFIG.site.cleMemoire);
 const inseeValide = (x) => typeof x === "string" && /^[0-9AB]{5}$/i.test(x);
+const MODES = ["habitant", "total"];
 
 const etat = {
-  ...etatInitial(), // insee, annee (null = la plus récente)
+  ...etatInitial(), // insee, annee (null = la plus récente), mode (« habitant » ou « total »)
   commune: null, // comptes de la commune, toutes années
   ticket: null, // ticket affiché
 };
@@ -50,12 +51,13 @@ function etatInitial() {
   const p = lireParametresPage();
   const m = memoire.lire();
   const insee = [p.get("commune"), m.insee].find(inseeValide) ?? CONFIG.communeParDefaut.insee;
-  return { insee, annee: p.get("annee") };
+  const mode = [p.get("mode"), m.mode].find((x) => MODES.includes(x)) ?? "habitant";
+  return { insee, annee: p.get("annee"), mode };
 }
 
 function memoriser() {
-  ecrireParametresPage({ commune: etat.insee, annee: etat.annee });
-  memoire.ecrire({ insee: etat.insee });
+  ecrireParametresPage({ commune: etat.insee, annee: etat.annee, ...(etat.mode === "total" && { mode: "total" }) });
+  memoire.ecrire({ insee: etat.insee, mode: etat.mode });
 }
 
 // ---------- Affichage ----------
@@ -69,9 +71,11 @@ function afficher() {
   const { commune, ticket } = etat;
   message("");
   document.title = `${commune.nom} : le ticket de caisse de ta ville`;
-  afficherTicket($("ticket"), ticket);
-  afficherEvolution($("evolution"), commune, LIBELLES);
-  $("evolution-titre").textContent = `${commune.nom} sur ${Object.keys(commune.annees).length} ans (par habitant)`;
+  afficherTicket($("ticket"), ticket, etat.mode);
+  afficherEvolution($("evolution"), commune, LIBELLES, etat.mode);
+  const unite = etat.mode === "total" ? "pour toute la ville" : "par habitant";
+  $("evolution-titre").textContent = `${commune.nom} sur ${Object.keys(commune.annees).length} ans (${unite})`;
+  for (const b of document.querySelectorAll("[data-mode]")) b.setAttribute("aria-pressed", String(b.dataset.mode === etat.mode));
 
   const annees = Object.keys(commune.annees).sort().reverse();
   $("annee").replaceChildren(...annees.map((a) => el("option", { value: a }, a)));
@@ -105,14 +109,22 @@ function demarrer() {
     etat.annee = e.target.value;
     chargeur.lancer(); // les comptes sont en cache : seules les médianes de l'année sont demandées
   });
-  $("copier-texte").addEventListener("click", (e) => etat.ticket && copier(e.target, texteTicket(etat.ticket), "✓ Copié, colle-le sur Discord"));
+  for (const b of document.querySelectorAll("[data-mode]")) {
+    b.addEventListener("click", () => {
+      etat.mode = b.dataset.mode;
+      memoriser();
+      if (etat.ticket) afficher(); // rien à recharger : seuls les montants affichés changent
+    });
+  }
+  $("copier-texte").addEventListener("click", (e) => etat.ticket && copier(e.target, texteTicket(etat.ticket, etat.mode), "✓ Copié, colle-le sur Discord"));
   $("copier-lien").addEventListener("click", (e) => copier(e.target, location.href, "✓ Lien copié"));
   window.addEventListener("hashchange", () => {
     const p = lireParametresPage();
+    etat.mode = MODES.includes(p.get("mode")) ? p.get("mode") : "habitant";
     if (inseeValide(p.get("commune")) && (p.get("commune") !== etat.insee || p.get("annee") !== etat.annee)) {
       Object.assign(etat, { insee: p.get("commune"), annee: p.get("annee") });
       chargeur.lancer();
-    }
+    } else if (etat.ticket) afficher();
   });
   chargeur.lancer();
 }
